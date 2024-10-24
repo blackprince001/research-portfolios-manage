@@ -2,8 +2,8 @@ import React from 'react';
 import { useQuery, useMutation, useQueryClient } from 'react-query';
 import { Plus } from 'lucide-react';
 import toast from 'react-hot-toast';
-import { publicationsAPI } from '../api';
-import { Publication } from '../types';
+import { publicationsAPI } from '../../api';
+import { Publication } from '../../types';
 import { PublicationForm } from './PublicationForm';
 import { PublicationList } from './PublicationList';
 

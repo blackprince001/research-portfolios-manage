@@ -1,6 +1,6 @@
 import React from 'react';
 import { Edit2, Trash2, Book } from 'lucide-react';
-import { TeachingExperience } from '../types';
+import { TeachingExperience } from '../../types';
 
 interface TeachingListProps {
   teaching: TeachingExperience[];
@@ -30,7 +30,7 @@ export function TeachingList({ teaching, onEdit, onDelete }: TeachingListProps) 
                 
                 <div className="mt-4">
                   <h4 className="text-sm font-medium text-gray-700 mb-2">Courses:</h4>
-                  <ul className="space-y-2<boltAction type="file" filePath="src/components/TeachingList.tsx">
+                  {/* <ul className="space-y-2"> <boltAction type="file" filePath="src/components/TeachingList.tsx"> */}
                   <ul className="space-y-2">
                     {experience.courses.map((course) => (
                       <li key={course.id} className="flex items-center space-x-2 text-sm text-gray-600">

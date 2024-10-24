@@ -1,5 +1,5 @@
 import React from 'react';
-import { Publication } from '../types';
+import { Publication } from '../../types';
 import { PublicationCard } from './PublicationCard';
 
 interface PublicationGridProps {

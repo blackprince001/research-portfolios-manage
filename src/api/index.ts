@@ -1,13 +1,29 @@
 import axios from 'axios';
-import { Publication, PublicationFormData, BioSection, TeachingExperience, Course } from '../types';
+import {
+  Publication,
+  PublicationFormData,
+  BioSection,
+  TeachingExperience,
+  Course,
+} from '../types';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api';
+const API_BASE_URL =
+  import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api';
 
-const api = axios.create({
+export const api = axios.create({
   baseURL: API_BASE_URL,
   headers: {
     'Content-Type': 'application/json',
   },
+});
+
+// Add request interceptor to include auth token
+api.interceptors.request.use((config) => {
+  const token = localStorage.getItem('authToken');
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
 });
 
 export const publicationsAPI = {
@@ -29,7 +45,10 @@ export const publicationsAPI = {
     }
   },
 
-  update: async (id: number, data: Partial<Publication>): Promise<Publication> => {
+  update: async (
+    id: number,
+    data: Partial<Publication>
+  ): Promise<Publication> => {
     try {
       const response = await api.patch(`/publications/${id}`, data);
       return response.data;
@@ -66,7 +85,10 @@ export const bioSectionsAPI = {
     }
   },
 
-  update: async (id: number, data: Partial<BioSection>): Promise<BioSection> => {
+  update: async (
+    id: number,
+    data: Partial<BioSection>
+  ): Promise<BioSection> => {
     try {
       const response = await api.patch(`/bio-sections/${id}`, data);
       return response.data;
@@ -94,7 +116,9 @@ export const teachingAPI = {
     }
   },
 
-  create: async (data: Omit<TeachingExperience, 'id'>): Promise<TeachingExperience> => {
+  create: async (
+    data: Omit<TeachingExperience, 'id'>
+  ): Promise<TeachingExperience> => {
     try {
       const response = await api.post('/teaching', data);
       return response.data;
@@ -103,7 +127,10 @@ export const teachingAPI = {
     }
   },
 
-  update: async (id: number, data: Partial<TeachingExperience>): Promise<TeachingExperience> => {
+  update: async (
+    id: number,
+    data: Partial<TeachingExperience>
+  ): Promise<TeachingExperience> => {
     try {
       const response = await api.patch(`/teaching/${id}`, data);
       return response.data;

@@ -1,5 +1,5 @@
 import React from 'react';
-import { BioSection } from '../types';
+import { BioSection } from '../../types';
 
 interface BioSectionFormProps {
   bioSection?: BioSection | null;

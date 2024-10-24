@@ -3,8 +3,8 @@ import { useQuery, useMutation, useQueryClient } from 'react-query';
 import { toast } from 'react-hot-toast';
 import { Publication } from '../types';
 import { publicationsAPI } from '../api';
-import { PublicationForm } from './PublicationForm';
-import { PublicationGrid } from './PublicationGrid';
+import { PublicationForm } from './Publication/PublicationForm';
+import { PublicationGrid } from './Publication/PublicationGrid';
 import { GraduationCap, Plus } from 'lucide-react';
 
 export function Dashboard() {

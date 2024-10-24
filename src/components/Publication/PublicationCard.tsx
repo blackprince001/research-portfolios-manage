@@ -1,5 +1,5 @@
-import React from 'react';
-import { Publication } from '../types';
+import { ReactElement, JSXElementConstructor, ReactNode, ReactPortal, Key } from 'react';
+import { Publication } from '../../types';
 import { Book, Pencil, Trash2, FileText } from 'lucide-react';
 
 interface PublicationCardProps {
@@ -42,7 +42,7 @@ export function PublicationCard({
       </p>
 
       <div className="mt-4 flex flex-wrap gap-2">
-        {publication.keywords?.map((keyword, index) => (
+        {publication.keywords?.map((keyword: string | number | boolean | ReactElement<any, string | JSXElementConstructor<any>> | Iterable<ReactNode> | ReactPortal | null | undefined, index: Key | null | undefined) => (
           <span
             key={index}
             className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800"

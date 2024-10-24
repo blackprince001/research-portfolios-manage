@@ -2,24 +2,24 @@ import React from 'react';
 import { useQuery, useMutation, useQueryClient } from 'react-query';
 import { Plus } from 'lucide-react';
 import toast from 'react-hot-toast';
-import { bioSectionsAPI } from '../api';
-import { BioSection } from '../types';
-import { BioSectionForm } from './BioSectionForm';
-import { BioSectionList } from './BioSectionList';
+import { teachingAPI } from '../../api';
+import { TeachingExperience } from '../../types';
+import { TeachingForm } from './TeachingForm';
+import { TeachingList } from './TeachingList';
 
-export function BioSections() {
+export function TeachingExperiences() {
   const [isFormOpen, setIsFormOpen] = React.useState(false);
-  const [selectedBioSection, setSelectedBioSection] = React.useState<BioSection | null>(null);
+  const [selectedTeaching, setSelectedTeaching] = React.useState<TeachingExperience | null>(null);
   const queryClient = useQueryClient();
 
-  const { data: bioSections, isLoading } = useQuery('bioSections', () =>
-    bioSectionsAPI.getAll(1)
+  const { data: teaching, isLoading } = useQuery('teaching', () =>
+    teachingAPI.getAll(1)
   );
 
-  const createMutation = useMutation(bioSectionsAPI.create, {
+  const createMutation = useMutation(teachingAPI.create, {
     onSuccess: () => {
-      queryClient.invalidateQueries('bioSections');
-      toast.success('Bio section created successfully');
+      queryClient.invalidateQueries('teaching');
+      toast.success('Teaching experience created successfully');
       setIsFormOpen(false);
     },
     onError: (error: Error) => {
@@ -28,13 +28,13 @@ export function BioSections() {
   });
 
   const updateMutation = useMutation(
-    ({ id, data }: { id: number; data: Partial<BioSection> }) =>
-      bioSectionsAPI.update(id, data),
+    ({ id, data }: { id: number; data: Partial<TeachingExperience> }) =>
+      teachingAPI.update(id, data),
     {
       onSuccess: () => {
-        queryClient.invalidateQueries('bioSections');
-        toast.success('Bio section updated successfully');
-        setSelectedBioSection(null);
+        queryClient.invalidateQueries('teaching');
+        toast.success('Teaching experience updated successfully');
+        setSelectedTeaching(null);
         setIsFormOpen(false);
       },
       onError: (error: Error) => {
@@ -43,31 +43,31 @@ export function BioSections() {
     }
   );
 
-  const deleteMutation = useMutation(bioSectionsAPI.delete, {
+  const deleteMutation = useMutation(teachingAPI.delete, {
     onSuccess: () => {
-      queryClient.invalidateQueries('bioSections');
-      toast.success('Bio section deleted successfully');
+      queryClient.invalidateQueries('teaching');
+      toast.success('Teaching experience deleted successfully');
     },
     onError: (error: Error) => {
       toast.error(error.message);
     },
   });
 
-  const handleSubmit = (data: Partial<BioSection>) => {
-    if (selectedBioSection) {
-      updateMutation.mutate({ id: selectedBioSection.id, data });
+  const handleSubmit = (data: Partial<TeachingExperience>) => {
+    if (selectedTeaching) {
+      updateMutation.mutate({ id: selectedTeaching.id, data });
     } else {
-      createMutation.mutate(data as Omit<BioSection, 'id'>);
+      createMutation.mutate(data as Omit<TeachingExperience, 'id'>);
     }
   };
 
-  const handleEdit = (bioSection: BioSection) => {
-    setSelectedBioSection(bioSection);
+  const handleEdit = (teaching: TeachingExperience) => {
+    setSelectedTeaching(teaching);
     setIsFormOpen(true);
   };
 
   const handleDelete = (id: number) => {
-    if (window.confirm('Are you sure you want to delete this bio section?')) {
+    if (window.confirm('Are you sure you want to delete this teaching experience?')) {
       deleteMutation.mutate(id);
     }
   };
@@ -83,31 +83,31 @@ export function BioSections() {
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold text-gray-900">Bio Sections</h2>
+        <h2 className="text-2xl font-bold text-gray-900">Teaching Experience</h2>
         <button
           onClick={() => setIsFormOpen(true)}
           className="btn btn-primary flex items-center"
         >
           <Plus className="h-4 w-4 mr-1" />
-          Add Bio Section
+          Add Teaching Experience
         </button>
       </div>
 
       {isFormOpen && (
         <div className="bg-white rounded-lg shadow p-6">
-          <BioSectionForm
-            bioSection={selectedBioSection}
+          <TeachingForm
+            teaching={selectedTeaching}
             onSubmit={handleSubmit}
             onCancel={() => {
               setIsFormOpen(false);
-              setSelectedBioSection(null);
+              setSelectedTeaching(null);
             }}
           />
         </div>
       )}
 
-      <BioSectionList
-        bioSections={bioSections || []}
+      <TeachingList
+        teaching={teaching || []}
         onEdit={handleEdit}
         onDelete={handleDelete}
       />

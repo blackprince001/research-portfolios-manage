@@ -1,9 +1,13 @@
-import React from 'react';
 import { QueryClient, QueryClientProvider } from 'react-query';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
-import { Publications } from './components/Publications';
-import { BioSections } from './components/BioSections';
-import { TeachingExperiences } from './components/TeachingExperiences';
+import { AuthProvider } from './contexts/AuthContext';
+import { ProtectedRoute } from './components/ProtectedRoute';
+import { LoginPage } from './pages/LoginPage';
+import { RegisterPage } from './pages/RegisterPage';
+import { Publications } from './components/Publication/Publications';
+import { BioSections } from './components/BioSection/BioSections';
+import { TeachingExperiences } from './components/Teaching/TeachingExperiences';
 import { Header } from './components/Header';
 
 const queryClient = new QueryClient({
@@ -15,20 +19,34 @@ const queryClient = new QueryClient({
   },
 });
 
-function App() {
+export function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <div className="min-h-screen bg-gray-50">
-        <Header />
-        <main className="container mx-auto px-4 py-8 space-y-8">
-          <BioSections />
-          <Publications />
-          <TeachingExperiences />
-        </main>
-        <Toaster position="top-right" />
-      </div>
+      <AuthProvider>
+        <BrowserRouter>
+          <div className="min-h-screen bg-gray-50">
+            <Header />
+            <Routes>
+              <Route path="/login" element={<LoginPage />} />
+              <Route path="/register" element={<RegisterPage />} />
+              <Route
+                path="/"
+                element={
+                  <ProtectedRoute>
+                    <main className="container mx-auto px-4 py-8 space-y-8">
+                      <BioSections />
+                      <Publications />
+                      <TeachingExperiences />
+                    </main>
+                  </ProtectedRoute>
+                }
+              />
+              <Route path="*" element={<Navigate to="/" replace />} />
+            </Routes>
+            <Toaster position="top-right" />
+          </div>
+        </BrowserRouter>
+      </AuthProvider>
     </QueryClientProvider>
   );
 }
-
-export default App;

@@ -1,6 +1,7 @@
 export type PublicationType = 'published' | 'working_paper' | 'unpublished';
 
 export interface Publication {
+  [x: string]: any;
   id: number;
   userId: number;
   title: string;

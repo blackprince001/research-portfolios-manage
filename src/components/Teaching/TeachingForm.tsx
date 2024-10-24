@@ -1,6 +1,6 @@
 import React from 'react';
-import { TeachingExperience, Course } from '../types';
-import { CourseForm } from './CourseForm';
+import { TeachingExperience, Course } from '../../types';
+import { CourseForm } from '../CourseForm';
 
 interface TeachingFormProps {
   teaching?: TeachingExperience | null;

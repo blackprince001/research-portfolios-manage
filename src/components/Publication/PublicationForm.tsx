@@ -1,5 +1,5 @@
 import React from 'react';
-import { Publication, PublicationType } from '../types';
+import { Publication, PublicationType } from '../../types';
 
 interface PublicationFormProps {
   publication?: Publication | null;

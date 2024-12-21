@@ -22,6 +22,7 @@ import {
 } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import { Publication } from '@/types';
+import { PublicationPreview } from './publication-preview';
 
 const publicationSchema = z.object({
   title: z.string().min(1, 'Title is required'),
@@ -37,7 +38,7 @@ const publicationSchema = z.object({
 });
 
 interface PublicationFormProps {
-  publication?: Publication;
+  publication?: Publication | null;
   onSubmit: (data: z.infer<typeof publicationSchema>) => Promise<void>;
   onCancel: () => void;
 }
@@ -51,14 +52,21 @@ export function PublicationForm({
   const { toast } = useToast();
   const form = useForm<z.infer<typeof publicationSchema>>({
     resolver: zodResolver(publicationSchema),
-    defaultValues: publication || {
-      title: '',
-      abstract: '',
-      authors: '',
-      publication_type: '',
-      year: new Date().getFullYear(),
+    defaultValues: {
+      title: publication?.title || '',
+      abstract: publication?.abstract || '',
+      authors: publication?.authors || '',
+      publication_type: publication?.publication_type || '',
+      journal: publication?.journal || '',
+      conference: publication?.conference || '',
+      year: publication?.year || new Date().getFullYear(),
+      doi: publication?.doi || '',
+      url: publication?.url || '',
+      pdf_link: publication?.pdf_link || '',
     },
   });
+
+  const publicationType = form.watch('publication_type');
 
   const handleSubmit = async (data: z.infer<typeof publicationSchema>) => {
     setLoading(true);
@@ -95,6 +103,7 @@ export function PublicationForm({
             </FormItem>
           )}
         />
+
         <FormField
           control={form.control}
           name="abstract"
@@ -102,25 +111,47 @@ export function PublicationForm({
             <FormItem>
               <FormLabel>Abstract</FormLabel>
               <FormControl>
-                <Textarea {...field} />
+                <Textarea {...field} className="min-h-[100px]" />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
-        <FormField
-          control={form.control}
-          name="authors"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Authors</FormLabel>
-              <FormControl>
-                <Input {...field} placeholder="Separate authors with commas" />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+
+        <div className="grid grid-cols-2 gap-4">
+          <FormField
+            control={form.control}
+            name="authors"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Authors</FormLabel>
+                <FormControl>
+                  <Input {...field} placeholder="Separate authors with commas" />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="year"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Year</FormLabel>
+                <FormControl>
+                  <Input 
+                    type="number" 
+                    {...field} 
+                    onChange={e => field.onChange(parseInt(e.target.value))}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+
         <FormField
           control={form.control}
           name="publication_type"
@@ -147,10 +178,88 @@ export function PublicationForm({
             </FormItem>
           )}
         />
+
+        {publicationType === 'journal' && (
+          <FormField
+            control={form.control}
+            name="journal"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Journal</FormLabel>
+                <FormControl>
+                  <Input {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        )}
+
+        {publicationType === 'conference' && (
+          <FormField
+            control={form.control}
+            name="conference"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Conference</FormLabel>
+                <FormControl>
+                  <Input {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        )}
+
+        <div className="grid grid-cols-3 gap-4">
+          <FormField
+            control={form.control}
+            name="doi"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>DOI</FormLabel>
+                <FormControl>
+                  <Input {...field} placeholder="e.g., 10.1000/xyz123" />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="url"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>URL</FormLabel>
+                <FormControl>
+                  <Input {...field} type="url" />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="pdf_link"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>PDF Link</FormLabel>
+                <FormControl>
+                  <Input {...field} type="url" />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+
         <div className="flex justify-end space-x-2">
           <Button type="button" variant="outline" onClick={onCancel}>
             Cancel
           </Button>
+          <PublicationPreview data={form.getValues()} />
           <Button type="submit" disabled={loading}>
             {loading ? 'Saving...' : publication ? 'Update' : 'Create'}
           </Button>

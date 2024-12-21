@@ -12,13 +12,17 @@ import { PublicationForm } from '@/components/publications/publication-form';
 import { useAuth } from '@/lib/auth';
 import { publications } from '@/lib/api';
 import { Publication } from '@/types';
-import { Plus, Loader2 } from 'lucide-react';
+import { Plus, Loader2, Trash2 } from 'lucide-react';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import { useToast } from '@/hooks/use-toast';
 
 export function PublicationsPage() {
   const { user } = useAuth();
+  const { toast } = useToast();
   const [userPublications, setUserPublications] = useState<Publication[]>([]);
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [editingPublication, setEditingPublication] = useState<Publication | null>(null);
 
   const fetchPublications = async () => {
     try {
@@ -26,6 +30,11 @@ export function PublicationsPage() {
       setUserPublications(data);
     } catch (error) {
       console.error('Error fetching publications:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to load publications',
+        variant: 'destructive'
+      });
     } finally {
       setLoading(false);
     }
@@ -35,18 +44,64 @@ export function PublicationsPage() {
     fetchPublications();
   }, [user]);
 
-  const handleCreatePublication = async (data: Omit<Publication, 'id' | 'user_id'>) => {
+  const handleSubmit = async (data: Omit<Publication, 'id' | 'user_id'>) => {
     try {
-      await publications.createPublication({
-        ...data,
-        user_id: user!.id,
-      });
+      if (editingPublication) {
+        await publications.updatePublication(editingPublication.id, {
+          ...data,
+          user_id: user!.id
+        });
+        toast({
+          title: 'Success',
+          description: 'Publication updated successfully'
+        });
+      } else {
+        await publications.createPublication({
+          ...data,
+          user_id: user!.id
+        });
+        toast({
+          title: 'Success',
+          description: 'Publication created successfully'
+        });
+      }
       setDialogOpen(false);
       fetchPublications();
+      setEditingPublication(null);
     } catch (error) {
-      console.error('Error creating publication:', error);
+      console.error('Error saving publication:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to save publication',
+        variant: 'destructive'
+      });
       throw error;
     }
+  };
+
+  const handleDelete = async (id: number) => {
+    if (!confirm('Are you sure you want to delete this publication?')) return;
+
+    try {
+      await publications.deletePublication(id);
+      toast({
+        title: 'Success',
+        description: 'Publication deleted successfully'
+      });
+      fetchPublications();
+    } catch (error) {
+      console.error('Error deleting publication:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to delete publication',
+        variant: 'destructive'
+      });
+    }
+  };
+
+  const handleEdit = (publication: Publication) => {
+    setEditingPublication(publication);
+    setDialogOpen(true);
   };
 
   if (loading) {
@@ -61,64 +116,115 @@ export function PublicationsPage() {
 
   return (
     <DashboardLayout>
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Publications</h1>
-        <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-          <DialogTrigger asChild>
-            <Button>
-              <Plus className="h-4 w-4 mr-2" />
-              Add Publication
-            </Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Add New Publication</DialogTitle>
-            </DialogHeader>
-            <PublicationForm
-              onSubmit={handleCreatePublication}
-              onCancel={() => setDialogOpen(false)}
-            />
-          </DialogContent>
-        </Dialog>
-      </div>
-
-      <div className="grid gap-4">
-        {userPublications.map((pub) => (
-          <div
-            key={pub.id}
-            className="p-4 rounded-lg border bg-card text-card-foreground"
+      <div className="max-w-4xl mx-auto">
+        <div className="flex justify-between items-center mb-6">
+          <h1 className="text-2xl font-bold">Publications</h1>
+          <Dialog 
+            open={dialogOpen} 
+            onOpenChange={(open) => {
+              setDialogOpen(open);
+              if (!open) setEditingPublication(null);
+            }}
           >
-            <h3 className="text-lg font-semibold">{pub.title}</h3>
-            <p className="text-sm text-muted-foreground mt-1">
-              {pub.authors} • {pub.year}
-            </p>
-            <p className="mt-2">{pub.abstract}</p>
-            {(pub.doi || pub.url) && (
-              <div className="mt-2 space-x-2">
-                {pub.doi && (
-                  <a
-                    href={`https://doi.org/${pub.doi}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-sm text-blue-600 hover:underline"
-                  >
-                    DOI
-                  </a>
+            <DialogTrigger asChild>
+              <Button>
+                <Plus className="h-4 w-4 mr-2" />
+                Add Publication
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-2xl">
+              <DialogHeader>
+                <DialogTitle>
+                  {editingPublication ? 'Edit Publication' : 'Add Publication'}
+                </DialogTitle>
+              </DialogHeader>
+              <PublicationForm
+                publication={editingPublication}
+                onSubmit={handleSubmit}
+                onCancel={() => setDialogOpen(false)}
+              />
+            </DialogContent>
+          </Dialog>
+        </div>
+
+        <div className="space-y-4">
+          {userPublications.map((pub) => (
+            <Card key={pub.id} className="relative">
+              <CardHeader>
+                <div className="flex justify-between items-start">
+                  <div>
+                    <h3 className="text-lg font-semibold">{pub.title}</h3>
+                    <p className="text-sm text-muted-foreground">{pub.authors}</p>
+                    <p className="text-sm text-muted-foreground">{pub.year}</p>
+                  </div>
+                  <div className="flex space-x-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleEdit(pub)}
+                    >
+                      Edit
+                    </Button>
+                    <Button
+                      variant="destructive"
+                      size="sm"
+                      onClick={() => handleDelete(pub.id)}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <p className="mb-4">{pub.abstract}</p>
+                {pub.publication_type === 'journal' && pub.journal && (
+                  <p className="text-sm text-muted-foreground">Journal: {pub.journal}</p>
                 )}
-                {pub.url && (
-                  <a
-                    href={pub.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-sm text-blue-600 hover:underline"
-                  >
-                    Link
-                  </a>
+                {pub.publication_type === 'conference' && pub.conference && (
+                  <p className="text-sm text-muted-foreground">Conference: {pub.conference}</p>
                 )}
-              </div>
-            )}
-          </div>
-        ))}
+                <div className="flex space-x-2 mt-4">
+                  {pub.doi && (
+                    <a
+                      href={`https://doi.org/${pub.doi}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-sm text-blue-600 hover:underline"
+                    >
+                      DOI
+                    </a>
+                  )}
+                  {pub.url && (
+                    <a
+                      href={pub.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-sm text-blue-600 hover:underline"
+                    >
+                      Link
+                    </a>
+                  )}
+                  {pub.pdf_link && (
+                    <a
+                      href={pub.pdf_link}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-sm text-blue-600 hover:underline"
+                    >
+                      PDF
+                    </a>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+          
+          {userPublications.length === 0 && (
+            <div className="text-center py-12">
+              <p className="text-muted-foreground">No publications added yet.</p>
+            </div>
+          )}
+        </div>
       </div>
     </DashboardLayout>
   );

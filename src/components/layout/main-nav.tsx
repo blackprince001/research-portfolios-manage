@@ -3,18 +3,18 @@ import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/lib/auth';
 import {
+  LayoutDashboard,
   BookOpen,
   GraduationCap,
-  LayoutDashboard,
   UserCircle,
   LogOut,
 } from 'lucide-react';
 
 const navItems = [
-  { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-  { href: '/publications', label: 'Publications', icon: BookOpen },
-  { href: '/teaching', label: 'Teaching', icon: GraduationCap },
-  { href: '/profile', label: 'Profile', icon: UserCircle },
+  { href: '/dashboard', label: 'Dashboard', Icon: LayoutDashboard },
+  { href: '/publications', label: 'Publications', Icon: BookOpen },
+  { href: '/teaching', label: 'Teaching', Icon: GraduationCap },
+  { href: '/profile', label: 'Profile', Icon: UserCircle },
 ];
 
 export function MainNav() {
@@ -22,34 +22,32 @@ export function MainNav() {
   const { logout } = useAuth();
 
   return (
-    <nav className="flex items-center space-x-4 lg:space-x-6">
-      {navItems.map((item) => {
-        const Icon = item.icon;
-        return (
+    <div className="flex items-center justify-between w-full max-w-2xl mx-auto">
+      <nav className="flex items-center space-x-6">
+        {navItems.map(({ href, label, Icon }) => (
           <Link
-            key={item.href}
-            to={item.href}
+            key={href}
+            to={href}
             className={cn(
               'flex items-center space-x-2 text-sm font-medium transition-colors hover:text-primary',
-              location.pathname === item.href
+              location.pathname === href
                 ? 'text-primary'
                 : 'text-muted-foreground'
             )}
           >
             <Icon className="h-4 w-4" />
-            <span>{item.label}</span>
+            <span>{label}</span>
           </Link>
-        );
-      })}
+        ))}
+      </nav>
       <Button
         variant="ghost"
         size="sm"
-        className="ml-auto"
         onClick={() => logout()}
       >
         <LogOut className="h-4 w-4 mr-2" />
         Logout
       </Button>
-    </nav>
+    </div>
   );
 }

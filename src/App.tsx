@@ -1,52 +1,57 @@
-import { QueryClient, QueryClientProvider } from 'react-query';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { Toaster } from 'react-hot-toast';
-import { AuthProvider } from './contexts/AuthContext';
-import { ProtectedRoute } from './components/ProtectedRoute';
-import { LoginPage } from './pages/LoginPage';
-import { RegisterPage } from './pages/RegisterPage';
-import { Publications } from './components/Publication/Publications';
-import { BioSections } from './components/BioSection/BioSections';
-import { TeachingExperiences } from './components/Teaching/TeachingExperiences';
-import { Header } from './components/Header';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { AuthProvider } from './lib/auth';
+import { Toaster } from '@/components/ui/toaster';
+import { LoginPage } from '@/pages/login';
+import { RegisterPage } from '@/pages/register';
+import { DashboardPage } from '@/pages/dashboard';
+import { PublicationsPage } from '@/pages/publications';
+import { TeachingPage } from '@/pages/teaching';
+import { ProfilePage } from '@/pages/profile';
+import { ProtectedRoute } from '@/components/protected-route';
 
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      refetchOnWindowFocus: false,
-      retry: 1,
-    },
-  },
-});
-
-export function App() {
+export default function App() {
   return (
-    <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <BrowserRouter>
-          <div className="min-h-screen bg-gray-50">
-            <Header />
-            <Routes>
-              <Route path="/login" element={<LoginPage />} />
-              <Route path="/register" element={<RegisterPage />} />
-              <Route
-                path="/"
-                element={
-                  <ProtectedRoute>
-                    <main className="container mx-auto px-4 py-8 space-y-8">
-                      <BioSections />
-                      <Publications />
-                      <TeachingExperiences />
-                    </main>
-                  </ProtectedRoute>
-                }
-              />
-              <Route path="*" element={<Navigate to="/" replace />} />
-            </Routes>
-            <Toaster position="top-right" />
-          </div>
-        </BrowserRouter>
-      </AuthProvider>
-    </QueryClientProvider>
+    <AuthProvider>
+      <Router>
+        <Routes>
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/register" element={<RegisterPage />} />
+          <Route
+            path="/dashboard"
+            element={
+              <ProtectedRoute>
+                <DashboardPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/publications"
+            element={
+              <ProtectedRoute>
+                <PublicationsPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/teaching"
+            element={
+              <ProtectedRoute>
+                <TeachingPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/profile"
+            element={
+              <ProtectedRoute>
+                <ProfilePage />
+              </ProtectedRoute>
+            }
+          />
+          <Route path="/" element={<LoginPage />} />
+        </Routes>
+      </Router>
+      <Toaster />
+    </AuthProvider>
   );
 }

@@ -1,48 +1,45 @@
-export type PublicationType = 'published' | 'working_paper' | 'unpublished';
-
 export interface Publication {
-  [x: string]: any;
   id: number;
-  userId: number;
+  user_id: number;
   title: string;
   abstract: string;
   authors: string;
-  publicationType: PublicationType;
+  publication_type: string;
   journal?: string;
   conference?: string;
   year: number;
   doi?: string;
   url?: string;
-  citationCount?: number;
-  pdfLink?: string;
-  currentStatus?: string;
-  lastUpdated?: string;
-}
-
-export interface PublicationFormData extends Omit<Publication, 'id' | 'userId'> {}
-
-export interface BioSection {
-  id: number;
-  userId: number;
-  title: string;
-  content: string;
-  order: number;
+  pdf_link?: string;
 }
 
 export interface TeachingExperience {
   id: number;
-  userId: number;
+  user_id: number;
   institution: string;
   position: string;
   description: string;
-  startDate: string;
-  endDate?: string;
+  start_date: string;
+  end_date?: string;
   courses: Course[];
 }
 
 export interface Course {
   id: number;
-  teachingExperienceId: number;
+  teaching_id: number;
   name: string;
   description?: string;
+}
+
+export interface Profile {
+  id: number;
+  user_id: number;
+  home_content?: string[];
+  projects?: Array<{
+    title: string;
+    description: string;
+    url?: string;
+  }>;
+  teachings?: string[];
+  cv_link?: string;
 }

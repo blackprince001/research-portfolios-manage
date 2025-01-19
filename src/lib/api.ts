@@ -1,6 +1,7 @@
+import { variable } from '@/utils';
 import axios from 'axios';
 
-const API_URL = 'http://localhost:8000';
+const API_URL = variable.manage_url;
 
 const api = axios.create({
   baseURL: API_URL,

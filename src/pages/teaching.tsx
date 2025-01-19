@@ -13,7 +13,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/lib/auth';
 import { teaching } from '@/lib/api';
-import { TeachingExperience, Course } from '@/types';
+import { TeachingExperience } from '@/types';
 import { Plus, Loader2, Trash2 } from 'lucide-react';
 import { Card, CardHeader, CardContent } from '@/components/ui/card';
 

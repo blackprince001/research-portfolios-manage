@@ -3,7 +3,7 @@ import { DashboardLayout } from '@/components/layout/dashboard-layout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useAuth } from '@/lib/auth';
 import { publications, teaching, profiles } from '@/lib/api';
-import { Loader2, BookOpen, GraduationCap, User, Link as LinkIcon } from 'lucide-react';
+import { Loader2, BookOpen, GraduationCap, Link as LinkIcon } from 'lucide-react';
 import { Publication, TeachingExperience, Profile } from '@/types';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
@@ -39,43 +39,44 @@ export function DashboardPage() {
           publications.getUserPublications(user!.id),
           teaching.getUserTeaching(user!.id)
         ]);
-
+  
         setProfile(profileData);
         setPublications(pubData);
         setTeachingExp(teachData);
-
+  
         // Calculate publication statistics
-        const typeCount = pubData.reduce((acc, pub) => {
+        const typeCount = pubData.reduce((acc: Record<string, number>, pub: { publication_type: string }) => {
           acc[pub.publication_type] = (acc[pub.publication_type] || 0) + 1;
           return acc;
         }, {} as Record<string, number>);
-
-        const yearCount = pubData.reduce((acc, pub) => {
-          acc[pub.year] = (acc[pub.year] || 0) + 1;
+  
+        const yearCount = pubData.reduce((acc: Record<number, number>, pub: { year: string | number }) => {
+          const year = typeof pub.year === 'string' ? parseInt(pub.year) : pub.year;
+          acc[year] = (acc[year] || 0) + 1;
           return acc;
         }, {} as Record<number, number>);
-
+  
         setPublicationStats({
           totalPublications: pubData.length,
-          byType: Object.entries(typeCount).map(([type, count]) => ({ 
-            type: type.charAt(0).toUpperCase() + type.slice(1), 
-            count 
+          byType: Object.entries(typeCount).map(([type, count]) => ({
+            type: type.charAt(0).toUpperCase() + type.slice(1),
+            count: count as number // Explicitly ensure `count` is a number
           })),
           byYear: Object.entries(yearCount)
-            .map(([year, count]) => ({ 
-              year: parseInt(year), 
-              count 
+            .map(([year, count]) => ({
+              year: parseInt(year), // Ensure `year` is a number
+              count: count as number // Explicitly ensure `count` is a number
             }))
             .sort((a, b) => a.year - b.year)
         });
-
+  
       } catch (error) {
         console.error('Error fetching dashboard data:', error);
       } finally {
         setLoading(false);
       }
     };
-
+  
     fetchAllData();
   }, [user]);
 

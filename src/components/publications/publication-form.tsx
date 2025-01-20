@@ -170,8 +170,8 @@ export function PublicationForm({
                 <SelectContent>
                   <SelectItem value="journal">Journal Article</SelectItem>
                   <SelectItem value="conference">Conference Paper</SelectItem>
-                  <SelectItem value="book">Book</SelectItem>
-                  <SelectItem value="chapter">Book Chapter</SelectItem>
+                  <SelectItem value="research_report">Research Report</SelectItem>
+                  <SelectItem value="policy_brief">Policy Briefs</SelectItem>
                 </SelectContent>
               </Select>
               <FormMessage />

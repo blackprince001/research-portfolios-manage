@@ -7,6 +7,8 @@ export interface Publication {
   publication_type: string;
   journal?: string;
   conference?: string;
+  is_org: boolean;
+  poster?: string;
   year: number;
   doi?: string;
   url?: string;

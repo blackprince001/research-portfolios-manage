@@ -23,6 +23,8 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import { Publication } from '@/types';
 import { PublicationPreview } from './publication-preview';
+import { Switch } from '@/components/ui/switch';
+import { supabase } from '@/utils/supabase-client';
 
 const publicationSchema = z.object({
   title: z.string().min(1, 'Title is required'),
@@ -35,6 +37,8 @@ const publicationSchema = z.object({
   doi: z.string().optional(),
   url: z.string().url().optional().or(z.literal('')),
   pdf_link: z.string().url().optional().or(z.literal('')),
+  is_org: z.boolean(),
+  poster: z.string().url().optional().or(z.literal('')),
 });
 
 interface PublicationFormProps {
@@ -49,6 +53,7 @@ export function PublicationForm({
   onCancel,
 }: PublicationFormProps) {
   const [loading, setLoading] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const { toast } = useToast();
   const form = useForm<z.infer<typeof publicationSchema>>({
     resolver: zodResolver(publicationSchema),
@@ -63,10 +68,47 @@ export function PublicationForm({
       doi: publication?.doi || '',
       url: publication?.url || '',
       pdf_link: publication?.pdf_link || '',
+      is_org: publication?.is_org || false,
+      poster: publication?.poster || '',
     },
   });
 
   const publicationType = form.watch('publication_type');
+
+  const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    setUploading(true);
+
+    const fileExt = file.name.split('.').pop();
+    const fileName = `${Math.random()}.${fileExt}`;
+    const filePath = `${fileName}`;
+
+    const { error } = await supabase.storage
+      .from('posters')
+      .upload(filePath, file);
+
+    if (error) {
+      toast({
+        title: 'Error',
+        description: 'Failed to upload image',
+        variant: 'destructive',
+      });
+    } else {
+      const { data } = supabase.storage
+        .from('posters')
+        .getPublicUrl(filePath);
+
+      form.setValue('poster', data.publicUrl);
+      toast({
+        title: 'Success',
+        description: 'Image uploaded successfully',
+      });
+    }
+
+    setUploading(false);
+  };
 
   const handleSubmit = async (data: z.infer<typeof publicationSchema>) => {
     setLoading(true);
@@ -140,9 +182,9 @@ export function PublicationForm({
               <FormItem>
                 <FormLabel>Year</FormLabel>
                 <FormControl>
-                  <Input 
-                    type="number" 
-                    {...field} 
+                  <Input
+                    type="number"
+                    {...field}
                     onChange={e => field.onChange(parseInt(e.target.value))}
                   />
                 </FormControl>
@@ -178,6 +220,52 @@ export function PublicationForm({
             </FormItem>
           )}
         />
+
+        <FormField
+          control={form.control}
+          name="is_org"
+          render={({ field }) => (
+            <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+              <FormLabel>Is Organization</FormLabel>
+              <FormControl>
+                <Switch
+                  checked={field.value}
+                  onCheckedChange={(checked) => field.onChange(checked)}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="poster"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Poster</FormLabel>
+              <FormControl>
+                <div>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageUpload}
+                    disabled={uploading}
+                  />
+                  {field.value && (
+                    <img
+                      src={field.value}
+                      alt="Poster"
+                      className="mt-2 h-32 w-32 object-cover"
+                    />
+                  )}
+                </div>
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
 
         {publicationType === 'journal' && (
           <FormField

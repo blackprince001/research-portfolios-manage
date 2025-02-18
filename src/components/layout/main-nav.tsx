@@ -8,6 +8,7 @@ import {
   GraduationCap,
   UserCircle,
   LogOut,
+  CompassIcon,
 } from 'lucide-react';
 
 const navItems = [
@@ -15,6 +16,7 @@ const navItems = [
   { href: '/publications', label: 'Publications', Icon: BookOpen },
   { href: '/teaching', label: 'Teaching', Icon: GraduationCap },
   { href: '/profile', label: 'Profile', Icon: UserCircle },
+  { href: '/organization', label: 'Org', Icon: CompassIcon },
 ];
 
 export function MainNav() {

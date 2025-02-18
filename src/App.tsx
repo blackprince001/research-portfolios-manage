@@ -8,6 +8,7 @@ import { PublicationsPage } from '@/pages/publications';
 import { TeachingPage } from '@/pages/teaching';
 import { ProfilePage } from '@/pages/profile';
 import { ProtectedRoute } from '@/components/protected-route';
+import { OrganizationPage } from './pages/organization';
 
 export default function App() {
   return (
@@ -46,6 +47,15 @@ export default function App() {
               element={
                 <ProtectedRoute>
                   <ProfilePage />
+                </ProtectedRoute>
+              }
+            />
+            <Route path="/" element={<Navigate to="/login" replace />} />
+            <Route
+              path="/organization"
+              element={
+                <ProtectedRoute>
+                  <OrganizationPage />
                 </ProtectedRoute>
               }
             />

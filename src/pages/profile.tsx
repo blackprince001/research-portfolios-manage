@@ -8,8 +8,16 @@ import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/lib/auth';
 import { profiles } from '@/lib/api';
 import { Profile } from '@/types';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Upload } from 'lucide-react';
 import { ProfilePreview } from '@/components/profile/profile-preview';
+import { supabase } from '@/utils/supabase-client';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 
 export function ProfilePage() {
   const { user } = useAuth();
@@ -17,9 +25,13 @@ export function ProfilePage() {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const [formData, setFormData] = useState({
+    name: '',
+    org_role: 'team' as 'advisory' | 'team' | 'fellow',
     home_content: '',
     cv_link: '',
+    profile_image: '',
     projects: [{ title: '', description: '', url: '' }],
     teachings: ['']
   });
@@ -30,8 +42,11 @@ export function ProfilePage() {
         const data = await profiles.getProfile(user!.id);
         setProfile(data);
         setFormData({
+          name: data.name || '',
+          org_role: data.org_role || 'team',
           home_content: data.home_content?.join('\n') || '',
           cv_link: data.cv_link || '',
+          profile_image: data.profile_image || '',
           projects: data.projects || [{ title: '', description: '', url: '' }],
           teachings: data.teachings || ['']
         });
@@ -48,9 +63,58 @@ export function ProfilePage() {
     };
 
     fetchProfile();
-  }, [user]);
+  }, [user, toast]);
+
+  const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    setUploading(true);
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${Math.random()}.${fileExt}`;
+      const filePath = `${fileName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('profiles')
+        .upload(filePath, file);
+
+      if (uploadError) {
+        throw uploadError;
+      }
+
+      const { data } = supabase.storage
+        .from('profiles')
+        .getPublicUrl(filePath);
+
+      setFormData(prev => ({ ...prev, profile_image: data.publicUrl }));
+      toast({
+        title: 'Success',
+        description: 'Profile image uploaded successfully'
+      });
+    } catch (error) {
+      console.error('Error uploading image:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to upload profile image',
+        variant: 'destructive'
+      });
+    } finally {
+      setUploading(false);
+    }
+  };
 
   const handleSave = async () => {
+    // Validate required fields
+    if (!formData.name.trim()) {
+      toast({
+        title: 'Error',
+        description: 'Name is required',
+        variant: 'destructive'
+      });
+      return;
+    }
+
     setSaving(true);
     try {
       const dataToSave = {
@@ -113,6 +177,62 @@ export function ProfilePage() {
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
+              <label className="text-sm font-medium">Profile Image</label>
+              <div className="flex items-start space-x-4">
+                <div className="flex-shrink-0">
+                  {formData.profile_image ? (
+                    <img
+                      src={formData.profile_image || "/placeholder.svg"}
+                      alt="Profile"
+                      className="h-24 w-24 rounded-full object-cover"
+                    />
+                  ) : (
+                    <div className="h-24 w-24 rounded-full bg-muted flex items-center justify-center">
+                      <Upload className="h-8 w-8 text-muted-foreground" />
+                    </div>
+                  )}
+                </div>
+                <div className="flex-grow">
+                  <Input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageUpload}
+                    disabled={uploading}
+                  />
+                  <p className="text-sm text-muted-foreground mt-1">
+                    Recommended: Square image, at least 256x256 pixels
+                  </p>
+                </div>
+              </div>
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Name *</label>
+              <Input
+                value={formData.name}
+                onChange={e => setFormData(prev => ({ ...prev, name: e.target.value }))}
+                placeholder="Your full name"
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Role *</label>
+              <Select
+                value={formData.org_role}
+                onValueChange={(value: 'advisory' | 'team' | 'fellow') =>
+                  setFormData(prev => ({ ...prev, org_role: value }))
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select your role" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="advisory">Advisory</SelectItem>
+                  <SelectItem value="team">Team</SelectItem>
+                  <SelectItem value="fellow">Fellow</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
               <label className="text-sm font-medium">About Me</label>
               <Textarea
                 value={formData.home_content}
@@ -127,6 +247,7 @@ export function ProfilePage() {
                 value={formData.cv_link}
                 onChange={e => setFormData(prev => ({ ...prev, cv_link: e.target.value }))}
                 placeholder="Link to your CV"
+                type="url"
               />
             </div>
           </CardContent>
@@ -153,6 +274,7 @@ export function ProfilePage() {
                   value={project.url}
                   onChange={e => updateProject(index, 'url', e.target.value)}
                   placeholder="Project URL"
+                  type="url"
                 />
               </div>
             ))}

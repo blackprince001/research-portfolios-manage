@@ -13,7 +13,7 @@ import { useAuth } from '@/lib/auth';
 import { publications } from '@/lib/api';
 import { Publication } from '@/types';
 import { Plus, Loader2, Trash2 } from 'lucide-react';
-import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardFooter } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 
 export function PublicationsPage() {
@@ -42,7 +42,7 @@ export function PublicationsPage() {
 
   useEffect(() => {
     fetchPublications();
-  }, [user]);
+  }, []); // Updated useEffect dependency array
 
   const handleSubmit = async (data: Omit<Publication, 'id' | 'user_id'>) => {
     try {
@@ -119,8 +119,8 @@ export function PublicationsPage() {
       <div className="max-w-4xl mx-auto">
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-2xl font-bold">Publications</h1>
-          <Dialog 
-            open={dialogOpen} 
+          <Dialog
+            open={dialogOpen}
             onOpenChange={(open) => {
               setDialogOpen(open);
               if (!open) setEditingPublication(null);
@@ -216,9 +216,24 @@ export function PublicationsPage() {
                   )}
                 </div>
               </CardContent>
+              {pub.paper_summary && (
+                <CardFooter className="border-t pt-4">
+                  <div className="w-full">
+                    <h4 className="text-sm font-medium mb-2">Audio Summary</h4>
+                    <iframe
+                      width="100%"
+                      height="166"
+                      scrolling="no"
+                      frameBorder="no"
+                      allow="autoplay"
+                      src={`https://w.soundcloud.com/player/?url=${encodeURIComponent(pub.paper_summary)}&color=%23ff5500&auto_play=false&hide_related=true&show_comments=false&show_user=true&show_reposts=false&show_teaser=false`}
+                    ></iframe>
+                  </div>
+                </CardFooter>
+              )}
             </Card>
           ))}
-          
+
           {userPublications.length === 0 && (
             <div className="text-center py-12">
               <p className="text-muted-foreground">No publications added yet.</p>

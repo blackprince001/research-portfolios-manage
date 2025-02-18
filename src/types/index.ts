@@ -1,3 +1,27 @@
+// User types
+export interface User {
+  id: number;
+  username: string;
+}
+
+
+export interface Profile {
+  id: number;
+  user_id: string;
+  name: string;
+  org_role: 'advisory' | 'team' | 'fellow';
+  home_content?: string[];
+  cv_link?: string;
+  profile_image?: string;
+  projects: {
+    title: string;
+    description: string;
+    url: string;
+  }[];
+  teachings: string[];
+}
+
+// Publication types
 export interface Publication {
   id: number;
   user_id: number;
@@ -7,14 +31,16 @@ export interface Publication {
   publication_type: string;
   journal?: string;
   conference?: string;
-  is_org: boolean;
-  poster?: string;
   year: number;
   doi?: string;
+  is_org: boolean;
+  poster?: string;
+  paper_summary?: string;
   url?: string;
   pdf_link?: string;
 }
 
+// Teaching types
 export interface TeachingExperience {
   id: number;
   user_id: number;
@@ -33,15 +59,35 @@ export interface Course {
   description?: string;
 }
 
-export interface Profile {
+// Organization types
+export interface OrganizationCenter {
   id: number;
-  user_id: number;
-  home_content?: string[];
-  projects?: Array<{
-    title: string;
-    description: string;
-    url?: string;
-  }>;
-  teachings?: string[];
-  cv_link?: string;
+  center_name: string;
+  location: string;
+}
+
+export interface OrganizationPartner {
+  id: number;
+  name: string;
+  socials: string[];
+  logo_url: string;
+}
+
+export interface OrganizationCareer {
+  id: number;
+  title: string;
+  description: string;
+  type: string;
+  is_closed: boolean;
+}
+
+// Error types
+export interface ValidationError {
+  loc: (string | number)[];
+  msg: string;
+  type: string;
+}
+
+export interface HTTPValidationError {
+  detail: ValidationError[];
 }

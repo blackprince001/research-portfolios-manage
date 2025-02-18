@@ -34,6 +34,10 @@ export const auth = {
     const response = await api.post('/auth/register', formData);
     return response.data;
   },
+  deleteUser: async (userId: number) => {
+    const response = await api.delete(`/users/${userId}`);
+    return response.data;
+  },
 };
 
 export const profiles = {
@@ -49,11 +53,27 @@ export const profiles = {
     const response = await api.put(`/profiles/${profileId}`, data);
     return response.data;
   },
+  deleteProfile: async (profileId: number) => {
+    const response = await api.delete(`/profiles/${profileId}`);
+    return response.data;
+  },
 };
 
 export const publications = {
+  getAllPublications: async () => {
+    const response = await api.get('/publications/');
+    return response.data;
+  },
+  getOrgPublications: async () => {
+    const response = await api.get('/publications/org');
+    return response.data;
+  },
   getUserPublications: async (userId: number) => {
     const response = await api.get(`/publications/user/${userId}`);
+    return response.data;
+  },
+  getPublication: async (pubId: number) => {
+    const response = await api.get(`/publications/${pubId}`);
     return response.data;
   },
   createPublication: async (data: any) => {
@@ -73,6 +93,10 @@ export const publications = {
 export const teaching = {
   getUserTeaching: async (userId: number) => {
     const response = await api.get(`/teaching/user/${userId}`);
+    return response.data;
+  },
+  getTeaching: async (teachingId: number) => {
+    const response = await api.get(`/teaching/${teachingId}`);
     return response.data;
   },
   createTeaching: async (data: any) => {
@@ -104,3 +128,71 @@ export const teaching = {
     return response.data;
   },
 };
+
+export const organization = {
+  // Centers
+  getCenters: async () => {
+    const response = await api.get('/organization/centers/');
+    return response.data;
+  },
+  getCenter: async (centerId: number) => {
+    const response = await api.get(`/organization/centers/${centerId}`);
+    return response.data;
+  },
+  createCenter: async (data: any) => {
+    const response = await api.post('/organization/centers/', data);
+    return response.data;
+  },
+  updateCenter: async (centerId: number, data: any) => {
+    const response = await api.put(`/organization/centers/${centerId}`, data);
+    return response.data;
+  },
+  deleteCenter: async (centerId: number) => {
+    const response = await api.delete(`/organization/centers/${centerId}`);
+    return response.data;
+  },
+
+  // Partners
+  getPartners: async () => {
+    const response = await api.get('/organization/partners/');
+    return response.data;
+  },
+  getPartner: async (partnerId: number) => {
+    const response = await api.get(`/organization/partners/${partnerId}`);
+    return response.data;
+  },
+  createPartner: async (data: any) => {
+    const response = await api.post('/organization/partners/', data);
+    return response.data;
+  },
+  updatePartner: async (partnerId: number, data: any) => {
+    const response = await api.put(`/organization/partners/${partnerId}`, data);
+    return response.data;
+  },
+  deletePartner: async (partnerId: number) => {
+    const response = await api.delete(`/organization/partners/${partnerId}`);
+    return response.data;
+  },
+
+  // Careers
+  getCareers: async () => {
+    const response = await api.get('/organization/careers/');
+    return response.data;
+  },
+  getCareer: async (careerId: number) => {
+    const response = await api.get(`/organization/careers/${careerId}`);
+    return response.data;
+  },
+  createCareer: async (data: any) => {
+    const response = await api.post('/organization/careers/', data);
+    return response.data;
+  },
+  updateCareer: async (careerId: number, data: any) => {
+    const response = await api.put(`/organization/careers/${careerId}`, data);
+    return response.data;
+  },
+  deleteCareer: async (careerId: number) => {
+    const response = await api.delete(`/organization/careers/${careerId}`);
+    return response.data;
+  },
+}

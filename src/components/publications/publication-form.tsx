@@ -39,6 +39,7 @@ const publicationSchema = z.object({
   pdf_link: z.string().url().optional().or(z.literal('')),
   is_org: z.boolean(),
   poster: z.string().url().optional().or(z.literal('')),
+  paper_summary: z.string().url().optional().or(z.literal('')), // Add paper_summary field
 });
 
 interface PublicationFormProps {
@@ -70,6 +71,7 @@ export function PublicationForm({
       pdf_link: publication?.pdf_link || '',
       is_org: publication?.is_org || false,
       poster: publication?.poster || '',
+      paper_summary: publication?.paper_summary || '', // Add default value
     },
   });
 
@@ -254,7 +256,7 @@ export function PublicationForm({
                   />
                   {field.value && (
                     <img
-                      src={field.value}
+                      src={field.value || "/placeholder.svg"}
                       alt="Poster"
                       className="mt-2 h-32 w-32 object-cover"
                     />
@@ -342,6 +344,36 @@ export function PublicationForm({
             )}
           />
         </div>
+
+        <FormField
+          control={form.control}
+          name="paper_summary"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Paper Summary (SoundCloud URL)</FormLabel>
+              <FormControl>
+                <Input
+                  {...field}
+                  type="url"
+                  placeholder="https://soundcloud.com/your-audio-summary"
+                />
+              </FormControl>
+              <FormMessage />
+              {field.value && (
+                <div className="mt-2">
+                  <iframe
+                    width="100%"
+                    height="166"
+                    scrolling="no"
+                    frameBorder="no"
+                    allow="autoplay"
+                    src={`https://w.soundcloud.com/player/?url=${encodeURIComponent(field.value)}&color=%23ff5500&auto_play=false&hide_related=true&show_comments=false&show_user=true&show_reposts=false&show_teaser=false`}
+                  ></iframe>
+                </div>
+              )}
+            </FormItem>
+          )}
+        />
 
         <div className="flex justify-end space-x-2">
           <Button type="button" variant="outline" onClick={onCancel}>
